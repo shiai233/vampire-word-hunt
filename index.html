@@ -318,7 +318,7 @@
       <button id="registerButton" onclick="registerPlayer()">Start Playing</button>
     </div>
 
-    <!-- GAME AREA (always visible, but controls disabled until email) -->
+    <!-- GAME AREA (controls disabled until email) -->
     <div id="gameArea">
       <!-- STREAK + TOTAL SCORE -->
       <div class="streak-display">
@@ -375,7 +375,7 @@
       </div>
     </div>
 
-    <!-- SHARE SECTION (hidden until end of puzzle) -->
+    <!-- SHARE SECTION (hidden until end) -->
     <div id="shareSection" class="hidden">
       <h3>📤 Share Your Result</h3>
       <textarea id="shareText" readonly></textarea>
@@ -454,30 +454,34 @@
   </div>
 
   <script>
-    // ─── 0) CONFIGURE GOOGLE SHEETS POST URL ─────────────────────────────────────────
-    const SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwFgRuZBf5_ii-yTKqbx4lBPeVEC6Wio__PgS2mtzJVcHnzDBBfSWIm4P1-2GFqDkVn/exec";
+    //
+    // ─── 0) GOOGLE SHEETS LOGGING VIA GET + no-CORS ─────────────────────────────────────────
+    //
+    const SHEET_WEB_APP_URL =
+      "https://script.google.com/macros/s/AKfycbwFgRuZBf5_ii-yTKqbx4lBPeVEC6Wio__PgS2mtzJVcHnzDBBfSWIm4P1-2GFqDkVn/exec";
 
     function submitToGoogleSheets(email, action) {
-      const payload = { email: email, action: action };
-      fetch(SHEET_WEB_APP_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-      .then(response => response.json())
-      .then(json => {
-        if (json.result !== "success") {
-          console.error("Error writing to sheet:", json);
-        }
-      })
-      .catch(err => {
-        console.error("Fetch error:", err);
+      // Build a query string: ?email=...&action=...
+      const qs =
+        "?email=" + encodeURIComponent(email) +
+        "&action=" + encodeURIComponent(action);
+
+      // Fire a simple GET in no-cors mode so the browser does NOT preflight:
+      fetch(SHEET_WEB_APP_URL + qs, {
+        method: "GET",
+        mode: "no-cors"
+      }).catch((err) => {
+        // In “no-cors” mode, the browser will not allow reading the response,
+        // but the request still goes through. Any real network errors show up here.
+        console.error("Failed to log to Google Sheets:", err);
       });
     }
 
     //
-    // ─── 1) WORD DATABASE ─────────────────────────────────────────────────────
+    // ─── 1) WORD DATABASE ───────────────────────────────────────────────────────────────────
     //
+    // (Make sure you have plenty of non‐name words too—below are a mix of proper names
+    // and general vampire-lore terms.)
     let gameWords = [
       // Classic Dracula & Stoker
       { word: "DRACULA", hint: "🩸 The most famous vampire count from Transylvania", source: "Bram Stoker's Dracula" },
@@ -508,11 +512,9 @@
       { word: "MALKAVIAN", hint: "🤪 The clan cursed with madness but gifted with insight", source: "World of Darkness" },
 
       // Classic Horror & Literature
-      { word: "NOSFERATU", hint: "🎬 The rat-like vampire from German expressionist cinema", source: "Classic Cinema" },
-      { word: "ORLOK", hint: "👹 Count Orlok from the silent film masterpiece", source: "Classic Cinema" },
+      { word: "ORLOK", hint: "👹 Count from the silent film masterpiece", source: "Classic Cinema" },
       { word: "CARMILLA", hint: "🌹 The female vampire who predates Dracula", source: "J. Sheridan Le Fanu" },
-      { word: "VARNEY", hint: "🦷 The vampire with prominent fangs from penny dreadfuls", source: "Classic Literature" },
-      { word: "RUTHVEN", hint: "🎩 Lord Ruthven, one of the first vampire protagonists", source: "John Polidori" },
+      { word: "VARNEY", hint: "🦷 The vampire with prominent fangs from penny dreadfuls", source: "Classic Literature" }
 
       // Modern TV & Film
       { word: "ALUCARD", hint: "🔄 Dracula's name spelled backwards", source: "Modern Fiction" },
@@ -523,7 +525,7 @@
       { word: "KLAUS", hint: "👑 The original hybrid vampire-werewolf", source: "The Vampire Diaries" },
       { word: "ELIJAH", hint: "🤵 The noble original vampire in a suit", source: "The Vampire Diaries" },
 
-      // General Vampire Lore
+      // General Vampire Lore (non‐names)
       { word: "VAMPIRE", hint: "🦇 A creature that drinks blood and fears sunlight", source: "General Vampire Lore" },
       { word: "FANGS", hint: "🦷 Sharp teeth used for biting and feeding", source: "General Vampire Lore" },
       { word: "BLOOD", hint: "🩸 The crimson liquid vampires crave for survival", source: "General Vampire Lore" },
@@ -561,6 +563,7 @@
       { word: "DARKNESS", hint: "🌑 The absence of light where vampires thrive", source: "General Vampire Lore" }
     ];
 
+    // State variables:
     let currentWord = "";
     let currentHint = "";
     let currentSource = "";
@@ -577,33 +580,47 @@
 
     const ADMIN_PASSWORD = "WTFan2025!";
 
-    // ─── DAILY WORD SELECTION ────────────────────────────────────────────
+    //
+    // ─── 2) DAILY WORD SELECTION (SAME FOR EVERYONE ON LOCAL DATE) ─────────────────────────
+    //
     function getDailyWordObject() {
       const today = new Date();
-      const utcMidnight = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate()
-      ).getTime();
-      const dayIndex = Math.floor(utcMidnight / (1000 * 60 * 60 * 24));
+      // Use local year/month/day, then build a UTC timestamp for that local date:
+      const year = today.getFullYear();
+      const month = today.getMonth();
+      const date = today.getDate();
+      // Date.UTC(year, month, date) → noon‐UTC for that local date’s midnight
+      const dayIndex = Math.floor(
+        Date.UTC(year, month, date) / (1000 * 60 * 60 * 24)
+      );
+      // Choose a word by modulo the length of gameWords:
       const idx = dayIndex % gameWords.length;
       return gameWords[idx];
     }
 
-    // ─── ON PAGE LOAD ─────────────────────────────────────────────────────
+    //
+    // ─── 3) ON PAGE LOAD ─────────────────────────────────────────────────────────────────
+    //
     window.addEventListener("DOMContentLoaded", () => {
+      // Set the “#wordCount” for the admin panel
       document.getElementById("wordCount").textContent = gameWords.length;
+
+      // Pick today's word (same index for everyone who sees today’s local date)
       const dailyObj = getDailyWordObject();
       currentWord = dailyObj.word;
       currentHint = dailyObj.hint;
       currentSource = dailyObj.source;
+
+      // Initialize with all blanks:
       guessedWord = "_".repeat(currentWord.length);
       document.getElementById("wordDisplay").textContent =
         guessedWord.split("").join(" ");
       document.getElementById("wordSource").textContent = currentSource;
     });
 
-    // ─── REGISTER PLAYER ───────────────────────────────────────────────────
+    //
+    // ─── 4) REGISTER PLAYER ───────────────────────────────────────────────────────────────
+    //
     function registerPlayer() {
       const email = document.getElementById("emailInput").value.trim();
       if (!email || !email.includes("@")) {
@@ -611,12 +628,16 @@
         return;
       }
       playerEmail = email;
+
+      // Log “registered” to the sheet (via no‐cors GET):
       submitToGoogleSheets(playerEmail, "registered");
+
       loadPlayerData();
       document.getElementById("emailSection").classList.add("hidden");
       document.getElementById("guessInput").removeAttribute("disabled");
       document.getElementById("guessButton").removeAttribute("disabled");
       document.getElementById("hintButton").removeAttribute("disabled");
+
       if (hasPlayedToday()) disableForToday();
     }
 
@@ -682,11 +703,13 @@
       document.getElementById("guessInput").setAttribute("disabled", "true");
       document.getElementById("guessButton").setAttribute("disabled", "true");
       document.getElementById("hintButton").setAttribute("disabled", "true");
-      showMessage("You've already played today’s puzzle. Come back tomorrow!", "error");
+      showMessage("You’ve already played today’s puzzle. Come back tomorrow!", "error");
       document.getElementById("shareSection").classList.remove("hidden");
     }
 
-    // ─── UPDATE UI HELPERS ─────────────────────────────────────────────────
+    //
+    // ─── 5) UPDATE UI HELPERS ─────────────────────────────────────────────────────────
+    //
     function updateDisplay() {
       document.getElementById("wordDisplay").textContent =
         guessedWord.split("").join(" ");
@@ -734,7 +757,9 @@
       });
     }
 
-    // ─── GUESS LOGIC ─────────────────────────────────────────────────────────
+    //
+    // ─── 6) GUESS LOGIC ─────────────────────────────────────────────────────────────
+    //
     function makeGuess() {
       if (!playerEmail) {
         showMessage("Please register with an email first.", "error");
@@ -800,6 +825,7 @@
       const solutionChars = currentWord.split("");
       const guessChars = word.split("");
 
+      // First pass: mark greens
       for (let i = 0; i < solutionChars.length; i++) {
         if (guessChars[i] === solutionChars[i]) {
           tileStatuses[i] = "green";
@@ -807,6 +833,7 @@
           guessChars[i] = null;
         }
       }
+      // Second pass: mark yellows or grays
       for (let i = 0; i < guessChars.length; i++) {
         if (guessChars[i] === null) continue;
         const letter = guessChars[i];
@@ -854,7 +881,9 @@
       container.appendChild(rowDiv);
     }
 
-    // ─── HINT ─────────────────────────────────────────────────────────────────
+    //
+    // ─── 7) HINT LOGIC ─────────────────────────────────────────────────────────────────
+    //
     function getHint() {
       if (hasPlayedToday()) {
         disableForToday();
@@ -862,15 +891,22 @@
       }
       document.getElementById("hintDisplay").textContent = currentHint;
       if (hintsUsed === 0) {
-        attemptsLeft = Math.max(1, attemptsLeft - 1);
+        // Deduct one life (even if that brings lives to zero)
+        attemptsLeft--;
         hintsUsed++;
         updateStats();
         showMessage("Hint revealed! −1 life.", "error");
         savePlayerData(false);
+
+        if (attemptsLeft === 0) {
+          loseGame();
+        }
       }
     }
 
-    // ─── WIN / LOSE & SHARE SECTION ─────────────────────────────────────────────────
+    //
+    // ─── 8) WIN / LOSE & SHARE SECTION ───────────────────────────────────────────────
+    //
     function winGame() {
       const points = attemptsLeft * 10 + 20;
       dailyScore += points;
@@ -881,6 +917,7 @@
       updateStats();
       savePlayerData(true);
 
+      // Log a “win” action via GET/no-cors:
       submitToGoogleSheets(playerEmail, "win");
 
       showMessage(
@@ -901,6 +938,7 @@
       streak = 0;
       savePlayerData(true);
 
+      // Log a “lose” action via GET/no-cors:
       submitToGoogleSheets(playerEmail, "lose");
 
       showMessage(
@@ -962,7 +1000,9 @@
       window.open(twitterUrl, "_blank");
     }
 
-    // ─── ADMIN PANEL ─────────────────────────────────────────────────────────
+    //
+    // ─── 9) ADMIN PANEL ─────────────────────────────────────────────────────────────────
+    //
     function checkAdminAccess() {
       const password = document.getElementById("adminPassword").value;
       if (password === ADMIN_PASSWORD) {
@@ -1007,14 +1047,15 @@
       showMessage(`Added "${word}" to the database! 🧛‍♂️`, "success");
     }
 
-    // ─── MESSAGE HELPER ──────────────────────────────────────────────────────
+    //
+    // ─── 10) MESSAGE HELPER + ENTER-KEY SUPPORT ─────────────────────────────────────────
+    //
     function showMessage(text, type) {
       const messageEl = document.getElementById("message");
       messageEl.textContent = text;
       messageEl.className = `message ${type}`;
     }
 
-    // ─── ENTER‐KEY SUPPORT ───────────────────────────────────────────────────
     document.getElementById("guessInput").addEventListener("keypress", function (
       e
     ) {
@@ -1039,4 +1080,3 @@
   </script>
 </body>
 </html>
-```
