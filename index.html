@@ -455,33 +455,28 @@
 
   <script>
     //
-    // ─── 0) GOOGLE SHEETS LOGGING VIA GET + no-CORS ─────────────────────────────────────────
+    // ─── 0) GOOGLE SHEETS LOGGING VIA GET + no-CORS ──────────────────────────────────
     //
     const SHEET_WEB_APP_URL =
       "https://script.google.com/macros/s/AKfycbwFgRuZBf5_ii-yTKqbx4lBPeVEC6Wio__PgS2mtzJVcHnzDBBfSWIm4P1-2GFqDkVn/exec";
 
     function submitToGoogleSheets(email, action) {
-      // Build a query string: ?email=...&action=...
+      // Build query-string: ?email=...&action=...
       const qs =
         "?email=" + encodeURIComponent(email) +
         "&action=" + encodeURIComponent(action);
 
-      // Fire a simple GET in no-cors mode so the browser does NOT preflight:
       fetch(SHEET_WEB_APP_URL + qs, {
         method: "GET",
         mode: "no-cors"
-      }).catch((err) => {
-        // In “no-cors” mode, the browser will not allow reading the response,
-        // but the request still goes through. Any real network errors show up here.
+      }).catch(err => {
         console.error("Failed to log to Google Sheets:", err);
       });
     }
 
     //
-    // ─── 1) WORD DATABASE ───────────────────────────────────────────────────────────────────
+    // ─── 1) WORD DATABASE ───────────────────────────────────────────────────────────────
     //
-    // (Make sure you have plenty of non‐name words too—below are a mix of proper names
-    // and general vampire-lore terms.)
     let gameWords = [
       // Classic Dracula & Stoker
       { word: "DRACULA", hint: "🩸 The most famous vampire count from Transylvania", source: "Bram Stoker's Dracula" },
@@ -514,7 +509,7 @@
       // Classic Horror & Literature
       { word: "ORLOK", hint: "👹 Count from the silent film masterpiece", source: "Classic Cinema" },
       { word: "CARMILLA", hint: "🌹 The female vampire who predates Dracula", source: "J. Sheridan Le Fanu" },
-      { word: "VARNEY", hint: "🦷 The vampire with prominent fangs from penny dreadfuls", source: "Classic Literature" }
+      { word: "VARNEY", hint: "🦷 The vampire with prominent fangs from penny dreadfuls", source: "Classic Literature" },
 
       // Modern TV & Film
       { word: "ALUCARD", hint: "🔄 Dracula's name spelled backwards", source: "Modern Fiction" },
@@ -585,15 +580,12 @@
     //
     function getDailyWordObject() {
       const today = new Date();
-      // Use local year/month/day, then build a UTC timestamp for that local date:
       const year = today.getFullYear();
       const month = today.getMonth();
       const date = today.getDate();
-      // Date.UTC(year, month, date) → noon‐UTC for that local date’s midnight
       const dayIndex = Math.floor(
         Date.UTC(year, month, date) / (1000 * 60 * 60 * 24)
       );
-      // Choose a word by modulo the length of gameWords:
       const idx = dayIndex % gameWords.length;
       return gameWords[idx];
     }
@@ -602,16 +594,13 @@
     // ─── 3) ON PAGE LOAD ─────────────────────────────────────────────────────────────────
     //
     window.addEventListener("DOMContentLoaded", () => {
-      // Set the “#wordCount” for the admin panel
       document.getElementById("wordCount").textContent = gameWords.length;
 
-      // Pick today's word (same index for everyone who sees today’s local date)
       const dailyObj = getDailyWordObject();
       currentWord = dailyObj.word;
       currentHint = dailyObj.hint;
       currentSource = dailyObj.source;
 
-      // Initialize with all blanks:
       guessedWord = "_".repeat(currentWord.length);
       document.getElementById("wordDisplay").textContent =
         guessedWord.split("").join(" ");
@@ -629,7 +618,6 @@
       }
       playerEmail = email;
 
-      // Log “registered” to the sheet (via no‐cors GET):
       submitToGoogleSheets(playerEmail, "registered");
 
       loadPlayerData();
@@ -708,7 +696,7 @@
     }
 
     //
-    // ─── 5) UPDATE UI HELPERS ─────────────────────────────────────────────────────────
+    // ─── 5) UPDATE UI HELPERS ───────────────────────────────────────────────────────
     //
     function updateDisplay() {
       document.getElementById("wordDisplay").textContent =
@@ -825,7 +813,6 @@
       const solutionChars = currentWord.split("");
       const guessChars = word.split("");
 
-      // First pass: mark greens
       for (let i = 0; i < solutionChars.length; i++) {
         if (guessChars[i] === solutionChars[i]) {
           tileStatuses[i] = "green";
@@ -833,7 +820,6 @@
           guessChars[i] = null;
         }
       }
-      // Second pass: mark yellows or grays
       for (let i = 0; i < guessChars.length; i++) {
         if (guessChars[i] === null) continue;
         const letter = guessChars[i];
@@ -891,7 +877,6 @@
       }
       document.getElementById("hintDisplay").textContent = currentHint;
       if (hintsUsed === 0) {
-        // Deduct one life (even if that brings lives to zero)
         attemptsLeft--;
         hintsUsed++;
         updateStats();
@@ -917,7 +902,6 @@
       updateStats();
       savePlayerData(true);
 
-      // Log a “win” action via GET/no-cors:
       submitToGoogleSheets(playerEmail, "win");
 
       showMessage(
@@ -938,7 +922,6 @@
       streak = 0;
       savePlayerData(true);
 
-      // Log a “lose” action via GET/no-cors:
       submitToGoogleSheets(playerEmail, "lose");
 
       showMessage(
