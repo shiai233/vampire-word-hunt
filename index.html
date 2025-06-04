@@ -201,7 +201,7 @@
       color: #ffcccb;
     }
 
-    /* FEEDBACK ROWS (Wordle‐style) */
+    /* FEEDBACK ROWS (Wordle-style) */
     #feedbackRows {
       margin: 20px 0;
     }
@@ -365,7 +365,7 @@
         <div class="letter-grid" id="guessedLetters"></div>
       </div>
 
-      <!-- WORDLE‐STYLE FEEDBACK ROWS -->
+      <!-- WORDLE-STYLE FEEDBACK ROWS -->
       <div id="feedbackRows"></div>
 
       <!-- WORD SOURCE INFO -->
@@ -461,7 +461,6 @@
       "https://script.google.com/macros/s/AKfycbwFgRuZBf5_ii-yTKqbx4lBPeVEC6Wio__PgS2mtzJVcHnzDBBfSWIm4P1-2GFqDkVn/exec";
 
     function submitToGoogleSheets(email, action) {
-      // Build query-string: ?email=...&action=...
       const qs =
         "?email=" + encodeURIComponent(email) +
         "&action=" + encodeURIComponent(action);
@@ -507,9 +506,10 @@
       { word: "MALKAVIAN", hint: "🤪 The clan cursed with madness but gifted with insight", source: "World of Darkness" },
 
       // Classic Horror & Literature
-      { word: "ORLOK", hint: "👹 Count from the silent film masterpiece", source: "Classic Cinema" },
+      { word: "ORLOK", hint: "👹 Count Orlok from the silent film masterpiece", source: "Classic Cinema" },
       { word: "CARMILLA", hint: "🌹 The female vampire who predates Dracula", source: "J. Sheridan Le Fanu" },
       { word: "VARNEY", hint: "🦷 The vampire with prominent fangs from penny dreadfuls", source: "Classic Literature" },
+      { word: "RUTHVEN", hint: "🎩 Lord Ruthven, one of the first vampire protagonists", source: "John Polidori" },
 
       // Modern TV & Film
       { word: "ALUCARD", hint: "🔄 Dracula's name spelled backwards", source: "Modern Fiction" },
@@ -520,7 +520,7 @@
       { word: "KLAUS", hint: "👑 The original hybrid vampire-werewolf", source: "The Vampire Diaries" },
       { word: "ELIJAH", hint: "🤵 The noble original vampire in a suit", source: "The Vampire Diaries" },
 
-      // General Vampire Lore (non‐names)
+      // General Vampire Lore (non-names)
       { word: "VAMPIRE", hint: "🦇 A creature that drinks blood and fears sunlight", source: "General Vampire Lore" },
       { word: "FANGS", hint: "🦷 Sharp teeth used for biting and feeding", source: "General Vampire Lore" },
       { word: "BLOOD", hint: "🩸 The crimson liquid vampires crave for survival", source: "General Vampire Lore" },
@@ -618,6 +618,7 @@
       }
       playerEmail = email;
 
+      // Log "registered" to Google Sheets (GET/no-cors)
       submitToGoogleSheets(playerEmail, "registered");
 
       loadPlayerData();
@@ -813,6 +814,7 @@
       const solutionChars = currentWord.split("");
       const guessChars = word.split("");
 
+      // First pass: mark greens
       for (let i = 0; i < solutionChars.length; i++) {
         if (guessChars[i] === solutionChars[i]) {
           tileStatuses[i] = "green";
@@ -820,6 +822,7 @@
           guessChars[i] = null;
         }
       }
+      // Second pass: mark yellows or grays
       for (let i = 0; i < guessChars.length; i++) {
         if (guessChars[i] === null) continue;
         const letter = guessChars[i];
