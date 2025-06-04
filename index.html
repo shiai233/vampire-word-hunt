@@ -16,7 +16,6 @@
       flex-direction: column;
       align-items: center;
     }
-
     .game-container {
       background: rgba(0, 0, 0, 0.8);
       border: 3px solid #8b0000;
@@ -27,14 +26,12 @@
       box-shadow: 0 0 30px rgba(139, 0, 0, 0.5);
       text-align: center;
     }
-
     h1 {
       color: #ff6b6b;
       font-size: 2.5em;
       margin-bottom: 10px;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
     }
-
     .subtitle {
       font-style: italic;
       color: #ccc;
@@ -68,7 +65,6 @@
       border-radius: 10px;
       margin: 15px 0;
     }
-
     .stats {
       display: flex;
       justify-content: space-around;
@@ -77,17 +73,14 @@
       padding: 15px;
       border-radius: 10px;
     }
-
     .stat-item {
       text-align: center;
     }
-
     .stat-number {
       font-size: 1.5em;
       font-weight: bold;
       color: #ff6b6b;
     }
-
     .word-display {
       font-size: 2em;
       letter-spacing: 0.3em;
@@ -98,7 +91,6 @@
       border-radius: 10px;
       border: 2px solid #8b0000;
     }
-
     .hint {
       background: rgba(74, 14, 78, 0.3);
       padding: 15px;
@@ -106,11 +98,9 @@
       margin: 20px 0;
       border-left: 4px solid #ff6b6b;
     }
-
     .input-section {
       margin: 30px 0;
     }
-
     input[type="text"], input[type="email"] {
       background: rgba(0, 0, 0, 0.7);
       border: 2px solid #8b0000;
@@ -121,13 +111,11 @@
       width: 200px;
       margin-right: 10px;
     }
-
     input[type="text"]:focus, input[type="email"]:focus {
       outline: none;
       border-color: #ff6b6b;
       box-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
     }
-
     button {
       background: linear-gradient(135deg, #8b0000, #b30000);
       color: white;
@@ -139,44 +127,37 @@
       transition: all 0.3s ease;
       margin: 5px;
     }
-
     button:hover:enabled {
       background: linear-gradient(135deg, #b30000, #d40000);
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(139, 0, 0, 0.4);
     }
-
     button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
       transform: none;
       box-shadow: none;
     }
-
     .message {
       margin: 15px 0;
       padding: 10px;
       border-radius: 5px;
       font-weight: bold;
     }
-
     .success {
       background: rgba(0, 128, 0, 0.3);
       color: #90ee90;
     }
-
     .error {
       background: rgba(139, 0, 0, 0.3);
       color: #ffcccb;
     }
-
     .guessed-letters {
       margin: 20px 0;
       padding: 15px;
       background: rgba(0, 0, 0, 0.3);
       border-radius: 10px;
     }
-
     .letter-grid {
       display: flex;
       flex-wrap: wrap;
@@ -184,24 +165,21 @@
       justify-content: center;
       margin-top: 10px;
     }
-
     .letter {
       padding: 8px 12px;
       border-radius: 5px;
       font-weight: bold;
     }
-
     .correct-letter {
       background: rgba(0, 128, 0, 0.3);
       color: #90ee90;
     }
-
     .wrong-letter {
       background: rgba(139, 0, 0, 0.3);
       color: #ffcccb;
     }
 
-    /* FEEDBACK ROWS (Wordle-style) */
+    /* FEEDBACK ROWS (Wordle‐style) */
     #feedbackRows {
       margin: 20px 0;
     }
@@ -338,7 +316,7 @@
         </div>
       </div>
 
-      <!-- WORD DISPLAY (e.g. "_ _ _ _ _" ) -->
+      <!-- WORD DISPLAY -->
       <div class="word-display" id="wordDisplay">_ _ _ _ _ _ _</div>
 
       <!-- HINT AREA -->
@@ -359,7 +337,7 @@
 
       <div class="message" id="message"></div>
 
-      <!-- GUESSED LETTERS (A, B, C…) -->
+      <!-- GUESSED LETTERS -->
       <div class="guessed-letters">
         <strong>Guessed Letters:</strong>
         <div class="letter-grid" id="guessedLetters"></div>
@@ -395,8 +373,7 @@
         🦇 Join Group Chat with Vampires & Players
       </a>
       <p style="font-size: 0.9em; color: #ccc;">
-        Share strategies, discuss vampire lore, and compete in daily
-        challenges!
+        Share strategies, discuss vampire lore, and compete in daily challenges!
       </p>
     </div>
 
@@ -454,9 +431,7 @@
   </div>
 
   <script>
-    //
-    // ─── 0) GOOGLE SHEETS LOGGING VIA GET + no-CORS ──────────────────────────────────
-    //
+    // ─── 0) GOOGLE SHEETS LOGGING (GET + no-cors) ───────────────────────────────────
     const SHEET_WEB_APP_URL =
       "https://script.google.com/macros/s/AKfycbwFgRuZBf5_ii-yTKqbx4lBPeVEC6Wio__PgS2mtzJVcHnzDBBfSWIm4P1-2GFqDkVn/exec";
 
@@ -464,7 +439,6 @@
       const qs =
         "?email=" + encodeURIComponent(email) +
         "&action=" + encodeURIComponent(action);
-
       fetch(SHEET_WEB_APP_URL + qs, {
         method: "GET",
         mode: "no-cors"
@@ -473,13 +447,10 @@
       });
     }
 
-    //
-    // ─── 1) WORD DATABASE ───────────────────────────────────────────────────────────────
-    //
+    // ─── 1) WORD DATABASE ─────────────────────────────────────────────────────────────
     let gameWords = [
-      // Classic Dracula & Stoker
       { word: "DRACULA", hint: "🩸 The most famous vampire count from Transylvania", source: "Bram Stoker's Dracula" },
-      { word: "MINA",   hint: "📖 Jonathan Harker's wife who becomes connected to Dracula", source: "Bram Stoker's Dracula" },
+      { word: "MINA", hint: "📖 Jonathan Harker's wife who becomes connected to Dracula", source: "Bram Stoker's Dracula" },
       { word: "HARKER", hint: "🏠 The solicitor who first visits Castle Dracula", source: "Bram Stoker's Dracula" },
       { word: "RENFIELD", hint: "🕷️ Dracula's insane servant who eats flies", source: "Bram Stoker's Dracula" },
       { word: "HELSING", hint: "🔬 The vampire hunter and doctor who leads the fight", source: "Bram Stoker's Dracula" },
@@ -487,7 +458,6 @@
       { word: "WHITBY", hint: "⚓ The English coastal town where Dracula first arrives", source: "Bram Stoker's Dracula" },
       { word: "CARFAX", hint: "🏚️ The ruined estate Dracula purchases in England", source: "Bram Stoker's Dracula" },
 
-      // Anne Rice's Vampire Chronicles
       { word: "LESTAT", hint: "🎭 The Brat Prince of vampires from New Orleans", source: "Anne Rice Chronicles" },
       { word: "LOUIS", hint: "😢 The melancholy vampire who tells his story", source: "Anne Rice Chronicles" },
       { word: "CLAUDIA", hint: "👧 The child vampire with an adult mind", source: "Anne Rice Chronicles" },
@@ -496,7 +466,6 @@
       { word: "MAHARET", hint: "👁️ One of the first vampires, keeper of records", source: "Anne Rice Chronicles" },
       { word: "MARIUS", hint: "🏛️ The ancient Roman vampire who becomes a mentor", source: "Anne Rice Chronicles" },
 
-      // Vampire: The Masquerade
       { word: "MASQUERADE", hint: "🎭 The code that keeps vampire society hidden", source: "World of Darkness" },
       { word: "KINDRED", hint: "🤝 What vampires call themselves in modern nights", source: "World of Darkness" },
       { word: "EMBRACE", hint: "🫂 The act of turning a human into a vampire", source: "World of Darkness" },
@@ -505,13 +474,11 @@
       { word: "NOSFERATU", hint: "🐀 The clan of hideously deformed information brokers", source: "World of Darkness" },
       { word: "MALKAVIAN", hint: "🤪 The clan cursed with madness but gifted with insight", source: "World of Darkness" },
 
-      // Classic Horror & Literature
       { word: "ORLOK", hint: "👹 Count Orlok from the silent film masterpiece", source: "Classic Cinema" },
       { word: "CARMILLA", hint: "🌹 The female vampire who predates Dracula", source: "J. Sheridan Le Fanu" },
       { word: "VARNEY", hint: "🦷 The vampire with prominent fangs from penny dreadfuls", source: "Classic Literature" },
       { word: "RUTHVEN", hint: "🎩 Lord Ruthven, one of the first vampire protagonists", source: "John Polidori" },
 
-      // Modern TV & Film
       { word: "ALUCARD", hint: "🔄 Dracula's name spelled backwards", source: "Modern Fiction" },
       { word: "SPIKE", hint: "🚂 The punk rock vampire with bleached hair", source: "Buffy the Vampire Slayer" },
       { word: "ANGEL", hint: "😇 The vampire cursed with a soul", source: "Buffy the Vampire Slayer" },
@@ -520,7 +487,6 @@
       { word: "KLAUS", hint: "👑 The original hybrid vampire-werewolf", source: "The Vampire Diaries" },
       { word: "ELIJAH", hint: "🤵 The noble original vampire in a suit", source: "The Vampire Diaries" },
 
-      // General Vampire Lore (non-names)
       { word: "VAMPIRE", hint: "🦇 A creature that drinks blood and fears sunlight", source: "General Vampire Lore" },
       { word: "FANGS", hint: "🦷 Sharp teeth used for biting and feeding", source: "General Vampire Lore" },
       { word: "BLOOD", hint: "🩸 The crimson liquid vampires crave for survival", source: "General Vampire Lore" },
@@ -558,7 +524,7 @@
       { word: "DARKNESS", hint: "🌑 The absence of light where vampires thrive", source: "General Vampire Lore" }
     ];
 
-    // State variables:
+    // ─── 2) DAILY WORD SELECTION ─────────────────────────────────────────────────────
     let currentWord = "";
     let currentHint = "";
     let currentSource = "";
@@ -572,12 +538,8 @@
     let playerEmail = "";
     let isAdmin = false;
     let wordGuessResults = [];
-
     const ADMIN_PASSWORD = "WTFan2025!";
 
-    //
-    // ─── 2) DAILY WORD SELECTION (SAME FOR EVERYONE ON LOCAL DATE) ─────────────────────────
-    //
     function getDailyWordObject() {
       const today = new Date();
       const year = today.getFullYear();
@@ -590,26 +552,19 @@
       return gameWords[idx];
     }
 
-    //
-    // ─── 3) ON PAGE LOAD ─────────────────────────────────────────────────────────────────
-    //
     window.addEventListener("DOMContentLoaded", () => {
       document.getElementById("wordCount").textContent = gameWords.length;
-
       const dailyObj = getDailyWordObject();
       currentWord = dailyObj.word;
       currentHint = dailyObj.hint;
       currentSource = dailyObj.source;
-
       guessedWord = "_".repeat(currentWord.length);
       document.getElementById("wordDisplay").textContent =
         guessedWord.split("").join(" ");
       document.getElementById("wordSource").textContent = currentSource;
     });
 
-    //
-    // ─── 4) REGISTER PLAYER ───────────────────────────────────────────────────────────────
-    //
+    // ─── 3) REGISTER PLAYER ────────────────────────────────────────────────────────
     function registerPlayer() {
       const email = document.getElementById("emailInput").value.trim();
       if (!email || !email.includes("@")) {
@@ -617,16 +572,12 @@
         return;
       }
       playerEmail = email;
-
-      // Log "registered" to Google Sheets (GET/no-cors)
       submitToGoogleSheets(playerEmail, "registered");
-
       loadPlayerData();
       document.getElementById("emailSection").classList.add("hidden");
       document.getElementById("guessInput").removeAttribute("disabled");
       document.getElementById("guessButton").removeAttribute("disabled");
       document.getElementById("hintButton").removeAttribute("disabled");
-
       if (hasPlayedToday()) disableForToday();
     }
 
@@ -660,25 +611,22 @@
 
     function savePlayerData(didFinish = false) {
       const payload = {
-        totalScore: totalScore,
-        streak: streak,
+        totalScore,
+        streak,
         lastPlayed: didFinish ? getTodayDateString() : null,
-        attemptsLeft: attemptsLeft,
-        dailyScore: dailyScore,
-        guessedWord: guessedWord,
-        guessedLetters: guessedLetters,
-        wordGuessResults: wordGuessResults,
-        hintsUsed: hintsUsed,
+        attemptsLeft,
+        dailyScore,
+        guessedWord,
+        guessedLetters,
+        wordGuessResults,
+        hintsUsed,
       };
       localStorage.setItem(playerEmail, JSON.stringify(payload));
     }
 
     function getTodayDateString() {
       const d = new Date();
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
-        2,
-        "0"
-      )}-${String(d.getDate()).padStart(2, "0")}`;
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     }
 
     function hasPlayedToday() {
@@ -696,12 +644,9 @@
       document.getElementById("shareSection").classList.remove("hidden");
     }
 
-    //
-    // ─── 5) UPDATE UI HELPERS ───────────────────────────────────────────────────────
-    //
+    // ─── 4) UPDATE UI HELPERS ──────────────────────────────────────────────────────
     function updateDisplay() {
-      document.getElementById("wordDisplay").textContent =
-        guessedWord.split("").join(" ");
+      document.getElementById("wordDisplay").textContent = guessedWord.split("").join(" ");
       updateGuessedLetters();
     }
 
@@ -715,12 +660,10 @@
     function updateGuessedLetters() {
       const container = document.getElementById("guessedLetters");
       container.innerHTML = "";
-      guessedLetters.forEach((letterObj) => {
+      guessedLetters.forEach(letterObj => {
         const span = document.createElement("span");
         span.textContent = letterObj.letter;
-        span.className = `letter ${
-          letterObj.correct ? "correct-letter" : "wrong-letter"
-        }`;
+        span.className = `letter ${letterObj.correct ? "correct-letter" : "wrong-letter"}`;
         container.appendChild(span);
       });
     }
@@ -728,7 +671,7 @@
     function renderPreviousFeedback() {
       const container = document.getElementById("feedbackRows");
       container.innerHTML = "";
-      wordGuessResults.forEach((obj) => {
+      wordGuessResults.forEach(obj => {
         const statuses = obj.tileStatuses;
         const guess = obj.guessWord;
         const rowDiv = document.createElement("div");
@@ -746,9 +689,7 @@
       });
     }
 
-    //
-    // ─── 6) GUESS LOGIC ─────────────────────────────────────────────────────────────
-    //
+    // ─── 5) GUESS LOGIC ─────────────────────────────────────────────────────────────
     function makeGuess() {
       if (!playerEmail) {
         showMessage("Please register with an email first.", "error");
@@ -758,7 +699,6 @@
         disableForToday();
         return;
       }
-
       const input = document.getElementById("guessInput");
       const guess = input.value.toUpperCase().trim();
       if (!guess) {
@@ -766,31 +706,24 @@
         return;
       }
       input.value = "";
-
-      if (guess.length === 1) {
-        guessLetter(guess);
-      } else {
-        guessWord(guess);
-      }
+      if (guess.length === 1) guessLetter(guess);
+      else guessWord(guess);
     }
 
     function guessLetter(letter) {
-      if (guessedLetters.some((l) => l.letter === letter)) {
+      if (guessedLetters.some(l => l.letter === letter)) {
         showMessage("You already guessed that letter!", "error");
         return;
       }
       const inWord = currentWord.includes(letter);
-      guessedLetters.push({ letter: letter, correct: inWord });
-
+      guessedLetters.push({ letter, correct: inWord });
       if (inWord) {
         let newPattern = "";
         for (let i = 0; i < currentWord.length; i++) {
-          if (currentWord[i] === letter) newPattern += letter;
-          else newPattern += guessedWord[i];
+          newPattern += (currentWord[i] === letter ? letter : guessedWord[i]);
         }
         guessedWord = newPattern;
         showMessage(`Nice! "${letter}" is in the word.`, "success");
-
         if (!guessedWord.includes("_")) {
           winGame();
           return;
@@ -803,7 +736,6 @@
           return;
         }
       }
-
       updateDisplay();
       updateStats();
       savePlayerData(false);
@@ -813,8 +745,7 @@
       const tileStatuses = [];
       const solutionChars = currentWord.split("");
       const guessChars = word.split("");
-
-      // First pass: mark greens
+      // Mark greens
       for (let i = 0; i < solutionChars.length; i++) {
         if (guessChars[i] === solutionChars[i]) {
           tileStatuses[i] = "green";
@@ -822,7 +753,7 @@
           guessChars[i] = null;
         }
       }
-      // Second pass: mark yellows or grays
+      // Mark yellows or grays
       for (let i = 0; i < guessChars.length; i++) {
         if (guessChars[i] === null) continue;
         const letter = guessChars[i];
@@ -834,11 +765,9 @@
           tileStatuses[i] = "gray";
         }
       }
-
-      wordGuessResults.push({ guessWord: word, tileStatuses: tileStatuses });
+      wordGuessResults.push({ guessWord: word, tileStatuses });
       renderFeedbackRow(word, tileStatuses);
-
-      const allGreen = tileStatuses.every((status) => status === "green");
+      const allGreen = tileStatuses.every(status => status === "green");
       if (allGreen) {
         guessedWord = currentWord;
         winGame();
@@ -870,9 +799,7 @@
       container.appendChild(rowDiv);
     }
 
-    //
-    // ─── 7) HINT LOGIC ─────────────────────────────────────────────────────────────────
-    //
+    // ─── 6) HINT LOGIC ─────────────────────────────────────────────────────────────
     function getHint() {
       if (hasPlayedToday()) {
         disableForToday();
@@ -885,32 +812,23 @@
         updateStats();
         showMessage("Hint revealed! −1 life.", "error");
         savePlayerData(false);
-
         if (attemptsLeft === 0) {
           loseGame();
         }
       }
     }
 
-    //
-    // ─── 8) WIN / LOSE & SHARE SECTION ───────────────────────────────────────────────
-    //
+    // ─── 7) WIN / LOSE & SHARE ─────────────────────────────────────────────────────────
     function winGame() {
       const points = attemptsLeft * 10 + 20;
       dailyScore += points;
       totalScore += points;
       streak++;
-
       updateDisplay();
       updateStats();
       savePlayerData(true);
-
       submitToGoogleSheets(playerEmail, "win");
-
-      showMessage(
-        `🎉 Correct! "${currentWord}" earned you ${points} points!`,
-        "success"
-      );
+      showMessage(`🎉 Correct! "${currentWord}" earned you ${points} points!`, "success");
 
       const shareString = generateShareText(true);
       document.getElementById("shareText").value = shareString;
@@ -924,13 +842,8 @@
     function loseGame() {
       streak = 0;
       savePlayerData(true);
-
       submitToGoogleSheets(playerEmail, "lose");
-
-      showMessage(
-        `💀 The word was "${currentWord}". Your streak has been reset.`,
-        "error"
-      );
+      showMessage(`💀 The word was "${currentWord}". Your streak has been reset.`, "error");
 
       const shareString = generateShareText(false);
       document.getElementById("shareText").value = shareString;
@@ -947,26 +860,21 @@
       const mm = String(today.getMonth() + 1).padStart(2, "0");
       const dd = String(today.getDate()).padStart(2, "0");
       const dateString = `${yyyy}-${mm}-${dd}`;
-
-      let header = `🧛‍♂️ Vampire Word Hunt (${dateString}) ${
-        didWin ? "Win" : "Loss"
-      }\n`;
+      let header = `🧛‍♂️ Vampire Word Hunt (${dateString}) ${didWin ? "Win" : "Loss"}\n`;
       const numGuesses = wordGuessResults.length;
       const maxRows = 6;
       const scoreLine = didWin ? `${numGuesses}/${maxRows}` : `X/${maxRows}`;
       header += scoreLine + "\n";
-
-      wordGuessResults.forEach((obj) => {
+      wordGuessResults.forEach(obj => {
         const statuses = obj.tileStatuses;
         let line = "";
-        statuses.forEach((s) => {
+        statuses.forEach(s => {
           if (s === "green") line += "🟩";
           else if (s === "yellow") line += "🟨";
           else line += "⬛";
         });
         header += line + "\n";
       });
-
       return header.trim();
     }
 
@@ -980,15 +888,11 @@
 
     function shareOnTwitter() {
       const text = document.getElementById("shareText").value;
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        text
-      )}`;
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
       window.open(twitterUrl, "_blank");
     }
 
-    //
-    // ─── 9) ADMIN PANEL ─────────────────────────────────────────────────────────────────
-    //
+    // ─── 8) ADMIN PANEL ─────────────────────────────────────────────────────────────
     function checkAdminAccess() {
       const password = document.getElementById("adminPassword").value;
       if (password === ADMIN_PASSWORD) {
@@ -1009,7 +913,6 @@
       const wordInput = document.getElementById("newWord");
       const hintInput = document.getElementById("newHint");
       const categorySelect = document.getElementById("wordCategory");
-
       const word = wordInput.value.toUpperCase().trim();
       const hint = hintInput.value.trim();
       const category = categorySelect.value;
@@ -1021,11 +924,11 @@
         alert("Word must be at least 3 letters long!");
         return;
       }
-      if (gameWords.some((w) => w.word === word)) {
+      if (gameWords.some(w => w.word === word)) {
         alert("This word already exists in the database!");
         return;
       }
-      const newWordObj = { word: word, hint: hint, source: category };
+      const newWordObj = { word, hint, source: category };
       gameWords.push(newWordObj);
       document.getElementById("wordCount").textContent = gameWords.length;
       wordInput.value = "";
@@ -1033,32 +936,24 @@
       showMessage(`Added "${word}" to the database! 🧛‍♂️`, "success");
     }
 
-    //
-    // ─── 10) MESSAGE HELPER + ENTER-KEY SUPPORT ─────────────────────────────────────────
-    //
+    // ─── 9) MESSAGE HELPER + ENTER-KEY SUPPORT ───────────────────────────────────
     function showMessage(text, type) {
       const messageEl = document.getElementById("message");
       messageEl.textContent = text;
       messageEl.className = `message ${type}`;
     }
 
-    document.getElementById("guessInput").addEventListener("keypress", function (
-      e
-    ) {
+    document.getElementById("guessInput").addEventListener("keypress", function(e) {
       if (e.key === "Enter" && !document.getElementById("guessButton").disabled) {
         makeGuess();
       }
     });
-    document.getElementById("emailInput").addEventListener("keypress", function (
-      e
-    ) {
+    document.getElementById("emailInput").addEventListener("keypress", function(e) {
       if (e.key === "Enter") {
         registerPlayer();
       }
     });
-    document.getElementById("adminPassword").addEventListener("keypress", function (
-      e
-    ) {
+    document.getElementById("adminPassword").addEventListener("keypress", function(e) {
       if (e.key === "Enter") {
         checkAdminAccess();
       }
