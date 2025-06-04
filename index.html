@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -373,16 +374,6 @@
         <strong>📚 Word Source:</strong>
         <span id="wordSource">Classic Vampire Literature</span>
       </div>
-
-      <!-- SKIP BUTTON -->
-      <button
-        id="skipButton"
-        onclick="skipWord()"
-        style="background: #666;"
-        disabled
-      >
-        Skip Word (−1 Life)
-      </button>
     </div>
 
     <!-- SHARE SECTION (hidden until end of puzzle) -->
@@ -464,375 +455,117 @@
   </div>
 
   <script>
+    // ─── 0) CONFIGURE GOOGLE SHEETS POST URL ─────────────────────────────────────────
+    const SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwFgRuZBf5_ii-yTKqbx4lBPeVEC6Wio__PgS2mtzJVcHnzDBBfSWIm4P1-2GFqDkVn/exec";
+
+    function submitToGoogleSheets(email, action) {
+      const payload = { email: email, action: action };
+      fetch(SHEET_WEB_APP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      .then(response => response.json())
+      .then(json => {
+        if (json.result !== "success") {
+          console.error("Error writing to sheet:", json);
+        }
+      })
+      .catch(err => {
+        console.error("Fetch error:", err);
+      });
+    }
+
     //
     // ─── 1) WORD DATABASE ─────────────────────────────────────────────────────
     //
     let gameWords = [
       // Classic Dracula & Stoker
-      {
-        word: "DRACULA",
-        hint: "🩸 The most famous vampire count from Transylvania",
-        source: "Bram Stoker's Dracula",
-      },
-      {
-        word: "MINA",
-        hint: "📖 Jonathan Harker's wife who becomes connected to Dracula",
-        source: "Bram Stoker's Dracula",
-      },
-      {
-        word: "HARKER",
-        hint: "🏠 The solicitor who first visits Castle Dracula",
-        source: "Bram Stoker's Dracula",
-      },
-      {
-        word: "RENFIELD",
-        hint: "🕷️ Dracula's insane servant who eats flies",
-        source: "Bram Stoker's Dracula",
-      },
-      {
-        word: "HELSING",
-        hint: "🔬 The vampire hunter and doctor who leads the fight",
-        source: "Bram Stoker's Dracula",
-      },
-      {
-        word: "TRANSYLVANIA",
-        hint: "🏔️ The mountainous region where Dracula's castle stands",
-        source: "Bram Stoker's Dracula",
-      },
-      {
-        word: "WHITBY",
-        hint: "⚓ The English coastal town where Dracula first arrives",
-        source: "Bram Stoker's Dracula",
-      },
-      {
-        word: "CARFAX",
-        hint: "🏚️ The ruined estate Dracula purchases in England",
-        source: "Bram Stoker's Dracula",
-      },
+      { word: "DRACULA", hint: "🩸 The most famous vampire count from Transylvania", source: "Bram Stoker's Dracula" },
+      { word: "MINA",   hint: "📖 Jonathan Harker's wife who becomes connected to Dracula", source: "Bram Stoker's Dracula" },
+      { word: "HARKER", hint: "🏠 The solicitor who first visits Castle Dracula", source: "Bram Stoker's Dracula" },
+      { word: "RENFIELD", hint: "🕷️ Dracula's insane servant who eats flies", source: "Bram Stoker's Dracula" },
+      { word: "HELSING", hint: "🔬 The vampire hunter and doctor who leads the fight", source: "Bram Stoker's Dracula" },
+      { word: "TRANSYLVANIA", hint: "🏔️ The mountainous region where Dracula's castle stands", source: "Bram Stoker's Dracula" },
+      { word: "WHITBY", hint: "⚓ The English coastal town where Dracula first arrives", source: "Bram Stoker's Dracula" },
+      { word: "CARFAX", hint: "🏚️ The ruined estate Dracula purchases in England", source: "Bram Stoker's Dracula" },
 
       // Anne Rice's Vampire Chronicles
-      {
-        word: "LESTAT",
-        hint: "🎭 The Brat Prince of vampires from New Orleans",
-        source: "Anne Rice Chronicles",
-      },
-      {
-        word: "LOUIS",
-        hint: "😢 The melancholy vampire who tells his story",
-        source: "Anne Rice Chronicles",
-      },
-      {
-        word: "CLAUDIA",
-        hint: "👧 The child vampire with an adult mind",
-        source: "Anne Rice Chronicles",
-      },
-      {
-        word: "ARMAND",
-        hint: "🎨 The ancient vampire who leads the Theatre des Vampires",
-        source: "Anne Rice Chronicles",
-      },
-      {
-        word: "AKASHA",
-        hint: "👑 The first vampire, Queen of the Damned",
-        source: "Anne Rice Chronicles",
-      },
-      {
-        word: "MAHARET",
-        hint: "👁️ One of the first vampires, keeper of records",
-        source: "Anne Rice Chronicles",
-      },
-      {
-        word: "MARIUS",
-        hint: "🏛️ The ancient Roman vampire who becomes a mentor",
-        source: "Anne Rice Chronicles",
-      },
+      { word: "LESTAT", hint: "🎭 The Brat Prince of vampires from New Orleans", source: "Anne Rice Chronicles" },
+      { word: "LOUIS", hint: "😢 The melancholy vampire who tells his story", source: "Anne Rice Chronicles" },
+      { word: "CLAUDIA", hint: "👧 The child vampire with an adult mind", source: "Anne Rice Chronicles" },
+      { word: "ARMAND", hint: "🎨 The ancient vampire who leads the Theatre des Vampires", source: "Anne Rice Chronicles" },
+      { word: "AKASHA", hint: "👑 The first vampire, Queen of the Damned", source: "Anne Rice Chronicles" },
+      { word: "MAHARET", hint: "👁️ One of the first vampires, keeper of records", source: "Anne Rice Chronicles" },
+      { word: "MARIUS", hint: "🏛️ The ancient Roman vampire who becomes a mentor", source: "Anne Rice Chronicles" },
 
       // Vampire: The Masquerade
-      {
-        word: "MASQUERADE",
-        hint: "🎭 The code that keeps vampire society hidden",
-        source: "World of Darkness",
-      },
-      {
-        word: "KINDRED",
-        hint: "🤝 What vampires call themselves in modern nights",
-        source: "World of Darkness",
-      },
-      {
-        word: "EMBRACE",
-        hint: "🫂 The act of turning a human into a vampire",
-        source: "World of Darkness",
-      },
-      {
-        word: "VENTRUE",
-        hint: "👔 The clan of vampire nobility and leaders",
-        source: "World of Darkness",
-      },
-      {
-        word: "TOREADOR",
-        hint: "🎨 The clan of vampire artists and socialites",
-        source: "World of Darkness",
-      },
-      {
-        word: "NOSFERATU",
-        hint: "🐀 The clan of hideously deformed information brokers",
-        source: "World of Darkness",
-      },
-      {
-        word: "MALKAVIAN",
-        hint: "🤪 The clan cursed with madness but gifted with insight",
-        source: "World of Darkness",
-      },
+      { word: "MASQUERADE", hint: "🎭 The code that keeps vampire society hidden", source: "World of Darkness" },
+      { word: "KINDRED", hint: "🤝 What vampires call themselves in modern nights", source: "World of Darkness" },
+      { word: "EMBRACE", hint: "🫂 The act of turning a human into a vampire", source: "World of Darkness" },
+      { word: "VENTRUE", hint: "👔 The clan of vampire nobility and leaders", source: "World of Darkness" },
+      { word: "TOREADOR", hint: "🎨 The clan of vampire artists and socialites", source: "World of Darkness" },
+      { word: "NOSFERATU", hint: "🐀 The clan of hideously deformed information brokers", source: "World of Darkness" },
+      { word: "MALKAVIAN", hint: "🤪 The clan cursed with madness but gifted with insight", source: "World of Darkness" },
 
       // Classic Horror & Literature
-      {
-        word: "NOSFERATU",
-        hint: "🎬 The rat-like vampire from German expressionist cinema",
-        source: "Classic Cinema",
-      },
-      {
-        word: "ORLOK",
-        hint: "👹 Count Orlok from the silent film masterpiece",
-        source: "Classic Cinema",
-      },
-      {
-        word: "CARMILLA",
-        hint: "🌹 The female vampire who predates Dracula",
-        source: "J. Sheridan Le Fanu",
-      },
-      {
-        word: "VARNEY",
-        hint: "🦷 The vampire with prominent fangs from penny dreadfuls",
-        source: "Classic Literature",
-      },
-      {
-        word: "RUTHVEN",
-        hint: "🎩 Lord Ruthven, one of the first vampire protagonists",
-        source: "John Polidori",
-      },
+      { word: "NOSFERATU", hint: "🎬 The rat-like vampire from German expressionist cinema", source: "Classic Cinema" },
+      { word: "ORLOK", hint: "👹 Count Orlok from the silent film masterpiece", source: "Classic Cinema" },
+      { word: "CARMILLA", hint: "🌹 The female vampire who predates Dracula", source: "J. Sheridan Le Fanu" },
+      { word: "VARNEY", hint: "🦷 The vampire with prominent fangs from penny dreadfuls", source: "Classic Literature" },
+      { word: "RUTHVEN", hint: "🎩 Lord Ruthven, one of the first vampire protagonists", source: "John Polidori" },
 
       // Modern TV & Film
-      {
-        word: "ALUCARD",
-        hint: "🔄 Dracula's name spelled backwards",
-        source: "Modern Fiction",
-      },
-      {
-        word: "SPIKE",
-        hint: "🚂 The punk rock vampire with bleached hair",
-        source: "Buffy the Vampire Slayer",
-      },
-      {
-        word: "ANGEL",
-        hint: "😇 The vampire cursed with a soul",
-        source: "Buffy the Vampire Slayer",
-      },
-      {
-        word: "DAMON",
-        hint: "😈 The charming but dangerous Salvatore brother",
-        source: "The Vampire Diaries",
-      },
-      {
-        word: "STEFAN",
-        hint: "💚 The brooding vampire who fights his nature",
-        source: "The Vampire Diaries",
-      },
-      {
-        word: "KLAUS",
-        hint: "👑 The original hybrid vampire-werewolf",
-        source: "The Vampire Diaries",
-      },
-      {
-        word: "ELIJAH",
-        hint: "🤵 The noble original vampire in a suit",
-        source: "The Vampire Diaries",
-      },
+      { word: "ALUCARD", hint: "🔄 Dracula's name spelled backwards", source: "Modern Fiction" },
+      { word: "SPIKE", hint: "🚂 The punk rock vampire with bleached hair", source: "Buffy the Vampire Slayer" },
+      { word: "ANGEL", hint: "😇 The vampire cursed with a soul", source: "Buffy the Vampire Slayer" },
+      { word: "DAMON", hint: "😈 The charming but dangerous Salvatore brother", source: "The Vampire Diaries" },
+      { word: "STEFAN", hint: "💚 The brooding vampire who fights his nature", source: "The Vampire Diaries" },
+      { word: "KLAUS", hint: "👑 The original hybrid vampire-werewolf", source: "The Vampire Diaries" },
+      { word: "ELIJAH", hint: "🤵 The noble original vampire in a suit", source: "The Vampire Diaries" },
 
       // General Vampire Lore
-      {
-        word: "VAMPIRE",
-        hint: "🦇 A creature that drinks blood and fears sunlight",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "FANGS",
-        hint: "🦷 Sharp teeth used for biting and feeding",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "BLOOD",
-        hint: "🩸 The crimson liquid vampires crave for survival",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "COFFIN",
-        hint: "⚰️ Where vampires sleep during daylight hours",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "GARLIC",
-        hint: "🧄 A pungent plant that repels the undead",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "CROSS",
-        hint: "✝️ A holy symbol that wards off evil",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "STAKE",
-        hint: "🪵 A wooden weapon aimed at the heart",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "SUNLIGHT",
-        hint: "☀️ The deadly light that burns vampire flesh",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "MIRROR",
-        hint: "🪞 Something vampires cannot see themselves in",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "SILVER",
-        hint: "🥈 A precious metal harmful to supernatural beings",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "HOLY",
-        hint: "🙏 Sacred water that burns unholy flesh",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "CRYPT",
-        hint: "🏴‍☠️ An underground chamber for the dead",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "IMMORTAL",
-        hint: "♾️ Living forever, never aging or dying",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "UNDEAD",
-        hint: "💀 Neither truly alive nor completely dead",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "BITE",
-        hint: "🦷 The act of piercing flesh with fangs",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "TURN",
-        hint: "🔄 To transform a human into a vampire",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "CASTLE",
-        hint: "🏰 A fortress where ancient vampires dwell",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "MIDNIGHT",
-        hint: "🕛 The witching hour when darkness rules",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "MOONLIGHT",
-        hint: "🌙 Pale silver light preferred by night creatures",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "BAT",
-        hint: "🦇 A winged creature vampires transform into",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "WOLF",
-        hint: "🐺 Another form some vampires can take",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "MIST",
-        hint: "🌫️ A vaporous form vampires use to travel",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "HYPNOSIS",
-        hint: "👁️ Mind control power of elder vampires",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "THRALL",
-        hint: "🧠 A human under vampire mental control",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "SIRE",
-        hint: "👨‍👦 The vampire who created another vampire",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "FLEDGLING",
-        hint: "🐣 A newly turned vampire",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "ELDER",
-        hint: "👴 An ancient and powerful vampire",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "COVEN",
-        hint: "👥 A group or family of vampires",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "MANOR",
-        hint: "🏚️ A large estate house where vampires live",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "GOTHIC",
-        hint: "🏛️ The dark architectural style vampires prefer",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "RITUAL",
-        hint: "🕯️ Sacred ceremonies performed by vampire covens",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "CRIMSON",
-        hint: "🔴 The deep red color of fresh blood",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "ETERNAL",
-        hint: "⏳ Lasting forever, without end",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "SHADOW",
-        hint: "👤 Dark silhouettes cast by moonlight",
-        source: "General Vampire Lore",
-      },
-      {
-        word: "DARKNESS",
-        hint: "🌑 The absence of light where vampires thrive",
-        source: "General Vampire Lore",
-      },
+      { word: "VAMPIRE", hint: "🦇 A creature that drinks blood and fears sunlight", source: "General Vampire Lore" },
+      { word: "FANGS", hint: "🦷 Sharp teeth used for biting and feeding", source: "General Vampire Lore" },
+      { word: "BLOOD", hint: "🩸 The crimson liquid vampires crave for survival", source: "General Vampire Lore" },
+      { word: "COFFIN", hint: "⚰️ Where vampires sleep during daylight hours", source: "General Vampire Lore" },
+      { word: "GARLIC", hint: "🧄 A pungent plant that repels the undead", source: "General Vampire Lore" },
+      { word: "CROSS", hint: "✝️ A holy symbol that wards off evil", source: "General Vampire Lore" },
+      { word: "STAKE", hint: "🪵 A wooden weapon aimed at the heart", source: "General Vampire Lore" },
+      { word: "SUNLIGHT", hint: "☀️ The deadly light that burns vampire flesh", source: "General Vampire Lore" },
+      { word: "MIRROR", hint: "🪞 Something vampires cannot see themselves in", source: "General Vampire Lore" },
+      { word: "SILVER", hint: "🥈 A precious metal harmful to supernatural beings", source: "General Vampire Lore" },
+      { word: "HOLY", hint: "🙏 Sacred water that burns unholy flesh", source: "General Vampire Lore" },
+      { word: "CRYPT", hint: "🏴‍☠️ An underground chamber for the dead", source: "General Vampire Lore" },
+      { word: "IMMORTAL", hint: "♾️ Living forever, never aging or dying", source: "General Vampire Lore" },
+      { word: "UNDEAD", hint: "💀 Neither truly alive nor completely dead", source: "General Vampire Lore" },
+      { word: "BITE", hint: "🦷 The act of piercing flesh with fangs", source: "General Vampire Lore" },
+      { word: "TURN", hint: "🔄 To transform a human into a vampire", source: "General Vampire Lore" },
+      { word: "CASTLE", hint: "🏰 A fortress where ancient vampires dwell", source: "General Vampire Lore" },
+      { word: "MIDNIGHT", hint: "🕛 The witching hour when darkness rules", source: "General Vampire Lore" },
+      { word: "MOONLIGHT", hint: "🌙 Pale silver light preferred by night creatures", source: "General Vampire Lore" },
+      { word: "BAT", hint: "🦇 A winged creature vampires transform into", source: "General Vampire Lore" },
+      { word: "WOLF", hint: "🐺 Another form some vampires can take", source: "General Vampire Lore" },
+      { word: "MIST", hint: "🌫️ A vaporous form vampires use to travel", source: "General Vampire Lore" },
+      { word: "HYPNOSIS", hint: "👁️ Mind control power of elder vampires", source: "General Vampire Lore" },
+      { word: "THRALL", hint: "🧠 A human under vampire mental control", source: "General Vampire Lore" },
+      { word: "SIRE", hint: "👨‍👦 The vampire who created another vampire", source: "General Vampire Lore" },
+      { word: "FLEDGLING", hint: "🐣 A newly turned vampire", source: "General Vampire Lore" },
+      { word: "ELDER", hint: "👴 An ancient and powerful vampire", source: "General Vampire Lore" },
+      { word: "COVEN", hint: "👥 A group or family of vampires", source: "General Vampire Lore" },
+      { word: "MANOR", hint: "🏚️ A large estate house where vampires live", source: "General Vampire Lore" },
+      { word: "GOTHIC", hint: "🏛️ The dark architectural style vampires prefer", source: "General Vampire Lore" },
+      { word: "RITUAL", hint: "🕯️ Sacred ceremonies performed by vampire covens", source: "General Vampire Lore" },
+      { word: "CRIMSON", hint: "🔴 The deep red color of fresh blood", source: "General Vampire Lore" },
+      { word: "ETERNAL", hint: "⏳ Lasting forever, without end", source: "General Vampire Lore" },
+      { word: "SHADOW", hint: "👤 Dark silhouettes cast by moonlight", source: "General Vampire Lore" },
+      { word: "DARKNESS", hint: "🌑 The absence of light where vampires thrive", source: "General Vampire Lore" }
     ];
 
-    //
-    // ─── 2) GLOBAL STATE ─────────────────────────────────────────────────────────
-    //
-    let currentWord = ""; // Today’s solution
+    let currentWord = "";
     let currentHint = "";
     let currentSource = "";
-    let guessedWord = ""; // e.g. "D _ A _ _ A"
+    let guessedWord = "";
     let guessedLetters = [];
     let attemptsLeft = 6;
     let dailyScore = 0;
@@ -841,18 +574,12 @@
     let hintsUsed = 0;
     let playerEmail = "";
     let isAdmin = false;
-
-    // Each full‐word guess’s feedback array of ["green"/"yellow"/"gray"] rows + guessWord
     let wordGuessResults = [];
 
-    // Admin password (in a real deployment, handle server-side)
     const ADMIN_PASSWORD = "WTFan2025!";
 
-    //
-    // ─── 3) DAILY WORD SELECTION ─────────────────────────────────────────────────
-    //
+    // ─── DAILY WORD SELECTION ────────────────────────────────────────────
     function getDailyWordObject() {
-      // Compute “days since epoch” for today in local system time zone
       const today = new Date();
       const utcMidnight = new Date(
         today.getFullYear(),
@@ -860,36 +587,24 @@
         today.getDate()
       ).getTime();
       const dayIndex = Math.floor(utcMidnight / (1000 * 60 * 60 * 24));
-      // Deterministically pick an index:
       const idx = dayIndex % gameWords.length;
       return gameWords[idx];
     }
 
-    //
-    // ─── 4) ON PAGE LOAD ─────────────────────────────────────────────────────────
-    //
+    // ─── ON PAGE LOAD ─────────────────────────────────────────────────────
     window.addEventListener("DOMContentLoaded", () => {
-      // 1) Show total word count in admin panel
       document.getElementById("wordCount").textContent = gameWords.length;
-
-      // 2) Compute today’s word & hint
       const dailyObj = getDailyWordObject();
       currentWord = dailyObj.word;
       currentHint = dailyObj.hint;
       currentSource = dailyObj.source;
-
-      // 3) Display masked version (all underscores)
       guessedWord = "_".repeat(currentWord.length);
       document.getElementById("wordDisplay").textContent =
         guessedWord.split("").join(" ");
-
-      // 4) Display source
       document.getElementById("wordSource").textContent = currentSource;
     });
 
-    //
-    // ─── 5) REGISTER PLAYER ───────────────────────────────────────────────────────
-    //
+    // ─── REGISTER PLAYER ───────────────────────────────────────────────────
     function registerPlayer() {
       const email = document.getElementById("emailInput").value.trim();
       if (!email || !email.includes("@")) {
@@ -897,28 +612,18 @@
         return;
       }
       playerEmail = email;
-
-      // Load data if exists
+      submitToGoogleSheets(playerEmail, "registered");
       loadPlayerData();
-
-      // Hide email prompt
       document.getElementById("emailSection").classList.add("hidden");
-      // Enable all game controls
       document.getElementById("guessInput").removeAttribute("disabled");
       document.getElementById("guessButton").removeAttribute("disabled");
       document.getElementById("hintButton").removeAttribute("disabled");
-      document.getElementById("skipButton").removeAttribute("disabled");
-
-      // If user already played today, disable subito
-      if (hasPlayedToday()) {
-        disableForToday();
-      }
+      if (hasPlayedToday()) disableForToday();
     }
 
     function loadPlayerData() {
       const saved = localStorage.getItem(playerEmail);
       if (!saved) {
-        // No data yet: initialize scoreboard
         totalScore = 0;
         streak = 0;
         attemptsLeft = 6;
@@ -936,12 +641,10 @@
         guessedLetters = data.guessedLetters || [];
         wordGuessResults = data.wordGuessResults || [];
         hintsUsed = data.hintsUsed || 0;
-        // Reflect in UI:
         updateDisplay();
         updateStats();
         renderPreviousFeedback();
       }
-      // Always update streak and totalScore display
       document.getElementById("streakCount").textContent = streak;
       document.getElementById("totalScore").textContent = totalScore;
     }
@@ -980,15 +683,11 @@
       document.getElementById("guessInput").setAttribute("disabled", "true");
       document.getElementById("guessButton").setAttribute("disabled", "true");
       document.getElementById("hintButton").setAttribute("disabled", "true");
-      document.getElementById("skipButton").setAttribute("disabled", "true");
       showMessage("You've already played today’s puzzle. Come back tomorrow!", "error");
-      // Reveal share section if they completed
       document.getElementById("shareSection").classList.remove("hidden");
     }
 
-    //
-    // ─── 6) UPDATE UI HELPERS ────────────────────────────────────────────────────
-    //
+    // ─── UPDATE UI HELPERS ─────────────────────────────────────────────────
     function updateDisplay() {
       document.getElementById("wordDisplay").textContent =
         guessedWord.split("").join(" ");
@@ -1036,9 +735,7 @@
       });
     }
 
-    //
-    // ─── 7) GUESS LOGIC ───────────────────────────────────────────────────────────
-    //
+    // ─── GUESS LOGIC ─────────────────────────────────────────────────────────
     function makeGuess() {
       if (!playerEmail) {
         showMessage("Please register with an email first.", "error");
@@ -1064,7 +761,6 @@
       }
     }
 
-    // ── 7A) Single‐letter guess ─────────────────
     function guessLetter(letter) {
       if (guessedLetters.some((l) => l.letter === letter)) {
         showMessage("You already guessed that letter!", "error");
@@ -1100,13 +796,11 @@
       savePlayerData(false);
     }
 
-    // ── 7B) Full‐word guess ───────────────────────
     function guessWord(word) {
       const tileStatuses = [];
       const solutionChars = currentWord.split("");
       const guessChars = word.split("");
 
-      // 1) Greens
       for (let i = 0; i < solutionChars.length; i++) {
         if (guessChars[i] === solutionChars[i]) {
           tileStatuses[i] = "green";
@@ -1114,7 +808,6 @@
           guessChars[i] = null;
         }
       }
-      // 2) Yellows / grays
       for (let i = 0; i < guessChars.length; i++) {
         if (guessChars[i] === null) continue;
         const letter = guessChars[i];
@@ -1162,9 +855,7 @@
       container.appendChild(rowDiv);
     }
 
-    //
-    // ─── 8) HINT & SKIP ─────────────────────────────────────────────────────────
-    //
+    // ─── HINT ─────────────────────────────────────────────────────────────────
     function getHint() {
       if (hasPlayedToday()) {
         disableForToday();
@@ -1180,24 +871,7 @@
       }
     }
 
-    function skipWord() {
-      if (hasPlayedToday()) {
-        disableForToday();
-        return;
-      }
-      attemptsLeft--;
-      if (attemptsLeft <= 0) {
-        loseGame();
-      } else {
-        showMessage(`Skipped "${currentWord}". You may continue guessing.`, "error");
-        updateStats();
-        savePlayerData(false);
-      }
-    }
-
-    //
-    // ─── 9) WIN / LOSE & SHARE SECTION ────────────────────────────────────────────
-    //
+    // ─── WIN / LOSE & SHARE SECTION ─────────────────────────────────────────────────
     function winGame() {
       const points = attemptsLeft * 10 + 20;
       dailyScore += points;
@@ -1207,6 +881,8 @@
       updateDisplay();
       updateStats();
       savePlayerData(true);
+
+      submitToGoogleSheets(playerEmail, "win");
 
       showMessage(
         `🎉 Correct! "${currentWord}" earned you ${points} points!`,
@@ -1220,12 +896,13 @@
       document.getElementById("guessInput").setAttribute("disabled", "true");
       document.getElementById("guessButton").setAttribute("disabled", "true");
       document.getElementById("hintButton").setAttribute("disabled", "true");
-      document.getElementById("skipButton").setAttribute("disabled", "true");
     }
 
     function loseGame() {
       streak = 0;
       savePlayerData(true);
+
+      submitToGoogleSheets(playerEmail, "lose");
 
       showMessage(
         `💀 The word was "${currentWord}". Your streak has been reset.`,
@@ -1239,7 +916,6 @@
       document.getElementById("guessInput").setAttribute("disabled", "true");
       document.getElementById("guessButton").setAttribute("disabled", "true");
       document.getElementById("hintButton").setAttribute("disabled", "true");
-      document.getElementById("skipButton").setAttribute("disabled", "true");
     }
 
     function generateShareText(didWin) {
@@ -1287,9 +963,7 @@
       window.open(twitterUrl, "_blank");
     }
 
-    //
-    // ─── 10) ADMIN PANEL ─────────────────────────────────────────────────────────
-    //
+    // ─── ADMIN PANEL ─────────────────────────────────────────────────────────
     function checkAdminAccess() {
       const password = document.getElementById("adminPassword").value;
       if (password === ADMIN_PASSWORD) {
@@ -1334,18 +1008,14 @@
       showMessage(`Added "${word}" to the database! 🧛‍♂️`, "success");
     }
 
-    //
-    // ─── 11) MESSAGE HELPER ──────────────────────────────────────────────────────
-    //
+    // ─── MESSAGE HELPER ──────────────────────────────────────────────────────
     function showMessage(text, type) {
       const messageEl = document.getElementById("message");
       messageEl.textContent = text;
       messageEl.className = `message ${type}`;
     }
 
-    //
-    // ─── 12) ENTER‐KEY SUPPORT ───────────────────────────────────────────────────
-    //
+    // ─── ENTER‐KEY SUPPORT ───────────────────────────────────────────────────
     document.getElementById("guessInput").addEventListener("keypress", function (
       e
     ) {
@@ -1370,4 +1040,4 @@
   </script>
 </body>
 </html>
-
+```
